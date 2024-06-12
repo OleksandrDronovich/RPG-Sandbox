@@ -1,0 +1,122 @@
+using RPG.Combat;
+using RPG.Core;
+using RPG.Movement;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace RPG.FPS.Combat
+{
+    public class FirstPersonalFighter : MonoBehaviour, IAction
+    {
+        [SerializeField] float timeBeetwenAttacks = 1f;
+        [SerializeField] Transform leftHandTransform = null;
+        [SerializeField] Transform rightHandTransform = null;
+        [SerializeField] Weapon defaultWeapon = null;
+        [SerializeField] string defaultWeaponName = "Unarmed";
+
+        //Health target;
+        float timeSinceLastAttack = Mathf.Infinity;
+
+        Weapon currentWeapon = null;
+
+
+        private void Start()
+        {
+            Weapon weapon = UnityEngine.Resources.Load<Weapon>(defaultWeaponName);
+            EquipWeapon(weapon);
+        }
+
+        private void Update()
+        {
+            timeSinceLastAttack += Time.deltaTime;
+
+            //if (target == null) return;
+            //if (target.IsDead()) return;
+
+            //if (!GetIsInRange())
+            //{
+            //    //GetComponent<Mover>().MoveTo(target.transform.position, 1f);
+            //}
+            //else
+            //{
+                GetComponent<FirstPersonalMover>().Cancel();
+                AttackBehaviour();
+            //}
+        }
+
+        public void EquipWeapon(Weapon weapon)
+        {
+            currentWeapon = weapon;
+            Animator animator = GetComponent<Animator>();
+            weapon.Spawn(rightHandTransform, leftHandTransform, animator);
+        }
+
+        private void AttackBehaviour()
+        {
+            //transform.LookAt(target.transform);
+            if (timeSinceLastAttack > timeBeetwenAttacks)
+            {
+                TriggerAttack();
+                timeSinceLastAttack = 0;
+            }
+        }
+
+        private void TriggerAttack()
+        {
+            GetComponent<Animator>().ResetTrigger("stopAttack");
+            GetComponent<Animator>().SetTrigger("attack");
+        }
+
+        void Hit()
+        {
+            //if (target == null) return;
+
+            if (currentWeapon.HasProjectule())
+            {
+                currentWeapon.LaunchProjectile(rightHandTransform, leftHandTransform, null, gameObject);
+            }
+            else
+            {
+                //target.TakeDamage(currentWeapon.GetDamage());
+            }
+        }
+
+        void Shoot()
+        {
+            Hit();
+        }
+
+        //private bool GetIsInRange()
+        //{
+        //    return Vector3.Distance(transform.position, target.transform.position) < currentWeapon.GetRange();
+        //}
+
+        public void CanAttack()
+        {
+            //if (combatTarget == null) return false;
+            //Health targetToTest = combatTarget.GetComponent<Health>();
+
+            //return targetToTest != null && !targetToTest.IsDead();
+        }
+
+        public void Attack()
+        {
+            GetComponent<ActionScheduler>().StartAction(this);
+            //target = combatTarget.GetComponent<Health>();
+        }
+
+        public void Cancel()
+        {
+            StopAttack();
+            //target = null;
+            GetComponent<Mover>().Cancel();
+        }
+
+        private void StopAttack()
+        {
+            GetComponent<Animator>().ResetTrigger("attack");
+            GetComponent<Animator>().SetTrigger("stopAttack");
+        }
+    }
+}

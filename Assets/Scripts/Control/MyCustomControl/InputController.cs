@@ -13,8 +13,8 @@ public class InputController : MonoBehaviour
     void Awake()
     {
 #if UNITY_STANDALONE_WIN 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
         inputCanvas.SetActive(false);
 #elif PLATFORM_ANDROID
         inputCanvas.SetActive(true);
